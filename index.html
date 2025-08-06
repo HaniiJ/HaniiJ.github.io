@@ -6,6 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>HaniiJ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
     <link
       rel="stylesheet"
       as="style"
@@ -26,6 +34,173 @@
       }
       .artstation-text {
         color: #13aff0;
+      }
+      .twitter-text {
+        color: #1da1f2;
+      }
+      #lightbox-img {
+        transition: opacity 0.2s ease;
+        max-height: 95vh;
+        max-width: 95vw;
+        object-fit: contain;
+        z-index: 10;
+      }
+      #lightbox button, #lightbox-caption {
+        z-index: 20;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-slate-50 relative" style='font-family: "Work Sans", "Noto Sans", sans-serif;'>
+    <div class="flex flex-col h-full">
+      <header class="flex flex-wrap items-center justify-between border-b border-[#e7edf4] px-5 md:px-10 py-3 bg-white sticky top-0 z-50">
+        <div class="flex items-center gap-2 text-[#0d141c]">
+          <svg class="w-10 h-10" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#0d141c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 30 C16 18, 28 12, 32 20 C36 12, 48 18, 52 30 C60 32, 60 42, 50 46 C54 58, 42 60, 36 52 C32 60, 22 58, 24 46 C14 42, 4 38, 12 30 Z" />
+          </svg>
+          <h1 class="text-lg font-bold tracking-[-0.015em]">HaniiJ</h1>
+        </div>
+        <div class="flex flex-wrap items-center gap-4 md:gap-9 text-sm font-medium text-[#0d141c] mt-2 md:mt-0">
+          <a href="https://x.com/aceclaeo3715" target="_blank" class="twitter-text hover:underline">Twitter</a>
+          <a href="https://www.artstation.com/aceclaeo3715" target="_blank" class="artstation-text hover:underline">Artstation</a>
+          <div class="relative cursor-pointer copy-wrapper flex items-center gap-1" onclick="copyText(this, '82+ 010-0000-0000')">
+            <span class="copy-tooltip">📋</span>
+            82+ 010-0000-0000
+          </div>
+          <div class="relative cursor-pointer copy-wrapper flex items-center gap-1" onclick="copyText(this, 'aceclaeo3715@gmail.com')">
+            <span class="copy-tooltip">📋</span>
+            aceclaeo3715@gmail.com
+          </div>
+        </div>
+      </header>
+
+      <nav class="flex justify-center gap-4 py-6 flex-wrap">
+        <button class="category-btn bg-gray-400 text-white hover:bg-gray-500 px-4 py-2 rounded" data-category="all">All</button>
+        <button class="category-btn bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded" data-category="original">Original Characters</button>
+        <button class="category-btn bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded" data-category="sketch">Sketch</button>
+        <button class="category-btn bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded" data-category="fanart">Fanart</button>
+      </nav>
+
+      <main class="flex justify-center px-2 sm:px-5 md:px-10 lg:px-6 py-6">
+        <div class="w-full max-w-[1200px] flex flex-col gap-10">
+          <section>
+            <div id="gallery" class="flex flex-wrap gap-6 justify-center"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50 hidden">
+      <div class="absolute top-4 left-6 text-white text-sm bg-black bg-opacity-50 px-3 py-1 rounded" id="lightbox-caption"></div>
+      <button onclick="closeLightbox()" class="absolute top-4 right-6 text-white text-3xl">×</button>
+      <button onclick="toggleFullscreen()" class="absolute top-4 right-16 text-white text-lg border px-2 rounded">⛶</button>
+      <div class="relative w-full flex justify-center items-center">
+        <button onclick="prevImage()" class="absolute left-4 text-white text-3xl">←</button>
+        <img id="lightbox-img" src="" class="max-h-[95vh] max-w-[95vw] object-contain opacity-0" />
+        <button onclick="nextImage()" class="absolute right-4 text-white text-3xl">→</button>
+      </div>
+    </div>
+
+    <button onclick="scrollToTop()" class="fixed bottom-6 right-6 bg-[#0d141c] text-white text-xl rounded-full w-12 h-12 shadow-lg hover:bg-black transition">↑</button>
+
+    <script>
+      const imageData = [
+        { src: "https://github.com/HaniiJ/HaniiJ.github.io/blob/main/GRu9naDaMAAxZuJ.jpg?raw=true", alt: "하니제이 오리지널 캐릭터 1", tags: ["original"] },
+        { src: "https://github.com/HaniiJ/HaniiJ.github.io/blob/main/%EC%BA%90%EB%94%941.png?raw=true", alt: "하니제이 오리지널 캐릭터 2", tags: ["original", "fanart"] },
+        { src: "https://via.placeholder.com/960x540?text=준비중", alt: "준비중 이미지 1", tags: ["sketch"] },
+        { src: "https://via.placeholder.com/960x540?text=Fanart+Sketch", alt: "팬아트 스케치", tags: ["sketch", "fanart"] },
+        { src: "https://via.placeholder.com/960x540?text=Fanart+1", alt: "팬아트 1", tags: ["fanart"] }
+      ];
+
+      const gallery = document.getElementById('gallery');
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightbox-img');
+      const lightboxCaption = document.getElementById('lightbox-caption');
+      let currentIndex = 0;
+
+      function renderImages(filter = 'all') {
+        gallery.innerHTML = '';
+        imageData.forEach((img, i) => {
+          if (filter === 'all' || img.tags.includes(filter)) {
+            const imgEl = document.createElement('img');
+            imgEl.src = img.src;
+            imgEl.alt = img.alt;
+            imgEl.className = "w-80 h-52 object-cover rounded cursor-pointer hover:scale-105 transition-transform";
+            imgEl.onclick = () => openLightbox(i);
+            gallery.appendChild(imgEl);
+          }
+        });
+      }
+
+      function openLightbox(index) {
+        currentIndex = index;
+        updateLightbox();
+        lightbox.classList.remove('hidden');
+      }
+
+      function updateLightbox() {
+        lightboxImg.style.opacity = 0;
+        setTimeout(() => {
+          lightboxImg.src = imageData[currentIndex].src;
+          lightboxCaption.textContent = imageData[currentIndex].alt;
+          lightboxImg.onload = () => lightboxImg.style.opacity = 1;
+        }, 100);
+      }
+
+      function closeLightbox() {
+        lightbox.classList.add('hidden');
+      }
+
+      function nextImage() {
+        currentIndex = (currentIndex + 1) % imageData.length;
+        updateLightbox();
+      }
+
+      function prevImage() {
+        currentIndex = (currentIndex - 1 + imageData.length) % imageData.length;
+        updateLightbox();
+      }
+
+      function toggleFullscreen() {
+        const elem = document.getElementById("lightbox-img");
+        if (!document.fullscreenElement) {
+          elem.requestFullscreen().catch(err => console.log(err));
+        } else {
+          document.exitFullscreen();
+        }
+      }
+
+      renderImages();
+
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const category = btn.dataset.category;
+          document.querySelectorAll('.category-btn').forEach(b => {
+            b.classList.remove('bg-gray-400', 'text-white');
+            b.classList.add('bg-gray-200');
+          });
+          btn.classList.remove('bg-gray-200');
+          btn.classList.add('bg-gray-400', 'text-white');
+          renderImages(category);
+        });
+      });
+
+      function copyText(element, text) {
+        navigator.clipboard.writeText(text).then(() => {
+          const tooltip = element.querySelector(".copy-tooltip");
+          tooltip.textContent = "✅";
+          setTimeout(() => {
+            tooltip.textContent = "📋";
+          }, 2000);
+        });
+      }
+
+      function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    </script>
+  </body>
+</html>
+
       }
       .twitter-text {
         color: #1da1f2;
